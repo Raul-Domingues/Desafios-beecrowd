@@ -1,66 +1,41 @@
-interface Case {
-    char: number;   //número de caracteres na cifra
-    qntChar: number;   //número de mensagens a serem cifradas
-    Originalcipher: string;  //string com os caracteres da cifra original
-    substituteCipher: string;  // string com os caracteres substitutos correspondentes
-    messages: string[]; // Um array de mensagens cifradas a serem decifradas
+import promptSync from 'prompt-sync';
+
+const prompt = promptSync();
+
+// Função para converter graus em horas, minutos e segundos
+function grausParaTempo(graus: number): [number, number, number] {
+    const totalHoras = graus * 24 / 360;
+    const horas = Math.floor(totalHoras);
+    const totalMinutos = (totalHoras - horas) * 60;
+    const minutos = Math.floor(totalMinutos);
+    const segundos = Math.floor((totalMinutos - minutos) * 60);
+    return [horas, minutos, segundos];
 }
 
-function decryptMessages(cases: Case[]): string {
-    const result: string[] = [];
-
-    cases.forEach((caseData) => {
-        const { char, qntChar, Originalcipher, substituteCipher, messages } = caseData;
-
-        const mapOriginalToReplacement: { [key: string]: string } = {};
-        const mapReplacementForOriginal: { [key: string]: string } = {};
-
-        for (let i = 0; i < qntChar; i++) {
-            mapOriginalToReplacement[Originalcipher[i].toLowerCase()] = substituteCipher[i].toLowerCase();
-            mapReplacementForOriginal[substituteCipher[i].toLowerCase()] = Originalcipher[i].toLowerCase();
-        }
-
-        function decifra(texto: string): string {
-            return texto.split('').map(char => {
-                const lowerChar = char.toLowerCase();
-                if (mapOriginalToReplacement[lowerChar]) {
-                    return char === lowerChar
-                        ? mapOriginalToReplacement[lowerChar]
-                        : mapOriginalToReplacement[lowerChar].toUpperCase();
-                } else if (mapReplacementForOriginal[lowerChar]) {
-                    return char === lowerChar
-                        ? mapReplacementForOriginal[lowerChar]
-                        : mapReplacementForOriginal[lowerChar].toUpperCase();
-                } else {
-                    return char;
-                }
-            }).join('');
-        }
-
-        messages.forEach((message) => {
-            result.push(decifra(message));
-        });
-        result.push('');
-    });
-
-    return result.join('\n');
-}
-
-const cases: Case[] = [
-    {
-        char: 5,
-        qntChar: 1,
-        Originalcipher: 'ZENIT',
-        substituteCipher: 'POLAR',
-        messages: ['Osro roxre osri caftide']
-    },
-    {
-        char: 3,
-        qntChar: 1,
-        Originalcipher: 'ABC',
-        substituteCipher: 'XYZ',
-        messages: ['testando']
+// Função para determinar a saudação com base nas horas
+function determinarSaudacao(horas: number): string {
+    if (horas >= 0 && horas < 6) {
+        return "De Madrugada!!";
+    } else if (horas >= 6 && horas < 12) {
+        return "Bom Dia!!";
+    } else if (horas >= 12 && horas < 18) {
+        return "Boa Tarde!!";
+    } else {
+        return "Boa Noite!!";
     }
-];
+}
 
-console.log(decryptMessages(cases));
+// Loop principal para ler entradas do usuário
+while (true) {
+    const input = prompt('Digite a posição do Sol/Lua em graus (ou Ctrl+C para sair): ');
+    const graus = parseFloat(input.trim());
+    
+    if (!isNaN(graus) && graus >= 0 && graus < 360) {
+        const [horas, minutos, segundos] = grausParaTempo(graus);
+        const saudacao = determinarSaudacao(horas);
+        console.log(saudacao);
+        console.log(`${horas.toString().padStart(2, '0')}:${minutos.toString().padStart(2, '0')}:${segundos.toString().padStart(2, '0')}`);
+    } else {
+        console.log("Por favor, insira um valor válido entre 0 e 360.");
+    }
+}
